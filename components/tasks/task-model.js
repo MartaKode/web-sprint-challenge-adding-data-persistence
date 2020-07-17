@@ -2,7 +2,7 @@ const db = require('../../data/db-config')
 
 module.exports = {
     getTasks,
-    addTask
+    addTask,
 }
 
 function getTasks () {

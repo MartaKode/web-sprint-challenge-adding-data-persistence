@@ -4,14 +4,91 @@ const { resource } = require('../../server')
 
 module.exports = {
     getResources,
-    addResource
+    // addResource,
+    getResourceProjects,
+    addResourceToProject,
+    addResourceToTask
 }
 
 function getResources() {
     return db('resource')
 }
 
-function addResource(newResource, project_id) {
+// function addResource(newResource) { // -->  delete later; not needed
+//     return db('resource')
+//         .insert(newResource, 'id')
+//         .then(([id]) => {
+//             return db('resource')
+//                 .where({ id })
+//                 .first()
+//         })
+// }
+
+function addResourceToProject(newResource, project_id) {
+
+    return db('resource')
+        .insert(newResource, 'id')
+        .then(([id]) => {
+
+            return db('projects_resource')
+                .insert({ resource_id: id, project_id }, 'id')
+                .then(() => {
+                    return db('resource')
+                        .where({ id })
+                        .first()
+                })
+                // .catch(err => {
+                //     console.log(err.message)
+                // })
+
+        })
+        // .catch(err => {
+        //     console.log(err.message)
+        // })
+
+}
+
+function getResourceProjects(resource_id) {
+
+    return db('projects_resource as pr')
+        .select('resource.id', 'resource.resource_name', 'projects.*')
+        .join('resource', 'resource.id', 'pr.resource_id')
+        .join('projects', 'projects.id', 'pr.project_id')
+        .where('resource_id', '=', resource_id)
+}
+
+
+function addResourceToTask (existingResource, task_id) {
+
+  //get task by id then add insert on intermediate table
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// \\\\\\\\\\\\\\\\\Spaghetti code:\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
     // return db('resource')
     // .insert(newResource, 'id')
     // .then( ([id]) => {
@@ -21,46 +98,43 @@ function addResource(newResource, project_id) {
     // })
 
 
-    return db('resource')
-        .select('resource.*', 'projects.project_name', 'pr.*')
-        .join('projects_resource as pr', 'resource.id', 'pr.resource_id')
-        .join('projects', 'projects.id', 'pr.project_id')
-        .where('projects.id', '=', project_id)
-        .insert(newResource, 'id')
-        .then(([id]) => {
 
-            return db('resource')
-                .where({ id }).first()
-                .then(() => {
-                    return db('projects_resource')
-                        .where('projects_resource.resource_id', '=', id)
-                        .insert(project_id, 'id')
-                })
-                .catch( err => {
-                    console.log(err.message)
-                })
+// function UpdateThirdTable(project_id, resource_id) {
+    //     return db('projects_resource as pr')
+    //         .insert(resource_id, 'id')
+    //         .where('pr.project_id', '=', project_id)
+    //     // .then( ([id]) => {
+    //     //     return    db('projects_resource')
+    //     //     .where({id})
+    //     //     .first()
 
-        })
-        .catch( err => {
-            console.log(err.message)
-        })
+    //     // })
+    // }
 
-}
+    // return db('resource')
+    //     .select('resource.*', 'projects.project_name', 'pr.*')
+    //     .join('projects_resource as pr', 'resource.id', 'pr.resource_id')
+    //     .join('projects', 'projects.id', 'pr.project_id')
+    //     .where('projects.id', '=', project_id)
+    //     .insert(newResource, 'id')
+    //     .then(([id]) => {
 
-function UpdateThirdTable(project_id, resource_id) {
-    return db('projects_resource as pr')
-        .insert(resource_id, 'id')
-        .where('pr.project_id', '=', project_id)
-    // .then( ([id]) => {
-    //     return    db('projects_resource')
-    //     .where({id})
-    //     .first()
+    //         return db('resource')
+    //             .where({ id }).first()
+    //             .then(() => {
+    //                 return db('projects_resource')
+    //                     .where('projects_resource.resource_id', '=', id)
+    //                     .insert(project_id, 'id')
+    //             })
+    //             .catch( err => {
+    //                 console.log(err.message)
+    //             })
 
-    // })
-}
+    //     })
+    //     .catch( err => {
+    //         console.log(err.message)
+    //     })
 
-
-// ````````Spaghetti code: 
 
 // return db('resource')
 // .insert(newResource, 'id')

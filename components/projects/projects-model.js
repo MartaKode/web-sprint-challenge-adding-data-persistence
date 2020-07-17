@@ -7,6 +7,9 @@ module.exports = {
     getProjectResources
 }
 
+//getProject by ID --> return tasks, resources as well
+//promise.all --> look it up ^
+
 function getProjects() {
    return db('projects')
 }

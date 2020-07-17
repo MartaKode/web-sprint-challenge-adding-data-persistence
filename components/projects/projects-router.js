@@ -85,8 +85,9 @@ router.post('/:id/resources', (req, res) => {
         res.status(400).json({ message: 'missing required field resource_name' })
     }
 
-    ResourceModel.addResource(req.body, req.params.id)
+    ResourceModel.addResourceToProject(req.body, req.params.id)
     .then(newResource => {
+        console.log('newResource', newResource)
         res.json(newResource)
     })
     .catch(err => {

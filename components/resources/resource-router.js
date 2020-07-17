@@ -2,12 +2,24 @@ const router = require('express').Router()
 
 const ResourceModel = require('./resource-model')
 
+router.use('/:id', validateResourceId)
 //```````GET````````
 //get resources
 router.get('/', (req, res) => {
     ResourceModel.getResources()
     .then(resources => {
         res.json(resources)
+    })
+    .catch(err => {
+        res.status(500).json({error: err.message})
+    })
+})
+
+//get projects by resource id
+router.get('/:id/projects', (req, res) => {
+    ResourceModel.getResourceProjects(req.params.id)
+    .then( projects => {
+        res.json(projects)
     })
     .catch(err => {
         res.status(500).json({error: err.message})
@@ -38,5 +50,22 @@ router.post('/', (req, res) => {
        
     })
 })
+
+// custom Middleware
+
+function validateResourceId(req, res, next) {
+    ResourceModel.getResources().where('id', '=', req.params.id).first()
+        .then(resource => {
+            // console.log('validateresourceID resource:', resource)
+            if (!resource) {
+                res.status(404).json({ message: 'invalid project id' })
+            } else {
+                next()
+            }
+        })
+        .catch(err => {
+            res.status(500).json({ error: err.message })
+        })
+}
 
 module.exports = router
