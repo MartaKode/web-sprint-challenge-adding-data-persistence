@@ -1,13 +1,13 @@
 const db = require('../../data/db-config')
-const { select } = require('../../data/db-config')
-const { resource } = require('../../server')
+const { where } = require('../../data/db-config')
+
 
 module.exports = {
     getResources,
     // addResource,
     getResourceProjects,
     addResourceToProject,
-    addResourceToTask
+    addEXISTINGResourceToTask
 }
 
 function getResources() {
@@ -37,14 +37,14 @@ function addResourceToProject(newResource, project_id) {
                         .where({ id })
                         .first()
                 })
-                // .catch(err => {
-                //     console.log(err.message)
-                // })
+            // .catch(err => {
+            //     console.log(err.message)
+            // })
 
         })
-        // .catch(err => {
-        //     console.log(err.message)
-        // })
+    // .catch(err => {
+    //     console.log(err.message)
+    // })
 
 }
 
@@ -58,9 +58,28 @@ function getResourceProjects(resource_id) {
 }
 
 
-function addResourceToTask (existingResource, task_id) {
+function addEXISTINGResourceToTask( resource_id, task_id , res) {
 
-  //get task by id then add insert on intermediate table
+    //get task by id then add insert on intermediate table
+    return db('tasks_resource')
+    .where({resource_id, task_id})
+    .then( rtObj => {
+        // console.log(rtObj)
+        if(!rtObj.length){
+            return db('tasks_resource')
+            .insert({ resource_id, task_id}, 'id')
+            .then(() => {
+            return  db('resource')
+              .select('resource.*', 'tr.task_id')
+              .join('tasks_resource as tr')
+              .where('id', '=', resource_id)
+              .first()
+            }) 
+        } else {
+           res.status(400).json({ message: 'resource with that id already exists in the task' })
+        }
+    })
+
 }
 
 
@@ -88,6 +107,16 @@ function addResourceToTask (existingResource, task_id) {
 
 
 // \\\\\\\\\\\\\\\\\Spaghetti code:\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    // return db('tasks_resource')
+    //     .insert({ resource_id, task_id}, 'id')
+    //     .then(() => {
+    //     return  db('resource')
+    //       .select('resource.*', 'tr.task_id')
+    //       .join('tasks_resource as tr')
+    //       .where('id', '=', resource_id)
+    //       .first()
+    //     })
 
     // return db('resource')
     // .insert(newResource, 'id')

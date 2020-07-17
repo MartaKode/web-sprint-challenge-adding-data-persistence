@@ -18,15 +18,35 @@ router.get('/', (req, res) => {
 
 //``````````POST````````
 //post resource by task id
-// router.post('/:id/resources', (req, res) => {
-//     ResourceModel.addResource({ ...req.body, task_id: req.params.id })
-//         .then(newResource => {
-//             res.json(newResource)
-//         })
-//         .catch(err => {
-//             res.status(500).json({ error: err.message })
-//         })
-// })
+router.post('/:id/resources', (req, res) => {
+
+    // function addEXISTINGResourceToTask( resource_id, task_id) {
+
+    //     //get task by id then add insert on intermediate table
+    
+    //     return db('tasks_resource')
+    //         .insert({ task_id, resource_id })
+    //         .then(() => {
+    //           db('resource')
+    //           .select('resource.*', 'tr.task_id')
+    //           .join('tasks_resource as tr')
+    //           .where('id', '=', resource_id)
+    //           .first()
+    //         })
+    
+    // }
+    if(!req.body.resource_id){
+        res.status(400).json({ message: 'please provide id of the resource you want to add to tasks as resource_id: idNumber'})
+    }
+
+    ResourceModel.addEXISTINGResourceToTask( req.body.resource_id, req.params.id, res )
+        .then(existingResource => {
+            res.json(existingResource)
+        })
+        .catch(err => {
+            res.status(500).json({ error: err.message })
+        })
+})
 
 
 //custom Middleware:

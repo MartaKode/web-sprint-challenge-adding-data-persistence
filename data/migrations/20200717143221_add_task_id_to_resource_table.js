@@ -8,7 +8,7 @@ exports.up = function (knex) {
     //         .onUpdate('CASCADE') //--> for foregin keys
     //         .onDelete('CASCADE') //--> for foregin keys
     // })
-    knex.schmema.createTable('tasks_resource', tbl => {
+return    knex.schema.createTable('tasks_resource', tbl => {
         tbl.integer('resource_id')
         .unsigned()
         .notNullable()
@@ -30,5 +30,5 @@ exports.down = function (knex) {
     //     tbl.dropColumn('task_id')
     // })
 
-    knex.schema.dropTableIfExists('tasks_resource')
+return    knex.schema.dropTableIfExists('tasks_resource')
 };
