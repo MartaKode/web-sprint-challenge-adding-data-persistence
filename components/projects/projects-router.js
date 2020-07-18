@@ -31,12 +31,112 @@ router.get('/:id/tasks', (req, res) => {
 //get resources by project id
 router.get('/:id/resources', (req, res) => {
     ProjectsModel.getProjectResources(req.params.id)
-    .then(resources => {
-        res.json(resources)
-    })
-    .catch(err => {
-        res.status(500).json({error: err.message})
-    })
+        .then(resources => {
+            res.json(resources)
+        })
+        .catch(err => {
+            res.status(500).json({ error: err.message })
+        })
+})
+
+//get project by id with resources and tasks details
+//attemp 1:
+
+// router.get('/:id', (req, res) => {
+//     ProjectsModel.getProjectByID(req.params.id)
+//     .then( project => {
+//         res.json(project)
+//     })
+//     .catch( err => {
+//         res.status(500).json({error: err.message})
+//     })
+// })
+
+
+//attempt 2:
+
+// router.get('/:id', (req, res) => {
+//    const project = new Promise(resolve => {
+//        resolve(
+//         ProjectsModel.getProjects().where('id', '=', req.params.id).first()
+//        )
+//    })
+
+//    const projectResources = new Promise (resolve => {
+//        resolve(
+//            ProjectsModel.getProjectResources(req.params.id)
+//        )
+//    })
+
+//    const projectTasks = new Promise (resolve => {
+//        resolve(
+//            ProjectsModel.getProjectTasks(req.params.id)
+//        )
+//    })
+
+//    Promise.all([project, projectResources, projectTasks])
+//    .then( results => {
+//     console.log(results)
+//     const organized = {project_info: results[0], project_resources: results[1], project_tasks: results[2]}
+//       res.json(organized)
+//    })
+//    .catch(err => {
+//     res.status(500).json({error: err.message})
+// })
+
+// })
+
+
+//Buddy reference: 
+
+// router.get('/:id', (req, res) => {
+//     const {id} = req.params
+//     queries = [
+//         ProjectsModel.getProjects().where({id}).first(),
+//          ProjectsModel.getProjectResources(id),
+//          ProjectsModel.getProjectTasks(id)
+//         ]
+
+//         Promise.all(queries)
+//         .then( ([project, resource, tasks]) => {
+//             res.status(200).json({
+//                 project: {
+//                     ...project,
+//                     project_completed: project.project_completed ? true : false
+//                 }, 
+//                 resources: resource.map( resource => {
+//                     return {
+//                         id: resource.id,
+//                         name: resource.resource_name,
+//                         deascription: resource.resource_description,
+//                         completed: resource.resource_completed ? true : false
+//                     }
+//                 }),
+//                 tasks: tasks.map( task => {
+//                     return {
+//                         ...task,
+//                         task_completed: task.task_completed ? true : false 
+//                     }
+//                 })
+//             })
+//         })
+// })
+
+//attemp 3 ASYNC await
+
+router.get('/:id', async (req, res) => {
+
+    try {
+        const {id} = req.params
+        const project = await ProjectsModel.getProjects().where({id}).first()
+        const projectResources = await ProjectsModel.getProjectResources(id)
+        const projectTasks = await ProjectsModel.getProjectTasks(id)
+
+        res.json({project, projectResources, projectTasks})
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+
 })
 
 
@@ -86,20 +186,20 @@ router.post('/:id/resources', (req, res) => {
     }
 
     ResourceModel.addResourceToProject(req.body, req.params.id)
-    .then(newResource => {
-        console.log('newResource', newResource)
-        res.json(newResource)
-    })
-    .catch(err => {
-        ResourceModel.getResources()
-        .then( resources => {
-            if( resources.filter(resource => resource.resource_name === req.body.resource_name)){
-                res.status(400).json({message: "resource_name must be unique"})
-            }else {
-                res.status(500).json({error: err.message})
-            }
-        }) 
-    })
+        .then(newResource => {
+            console.log('newResource', newResource)
+            res.json(newResource)
+        })
+        .catch(err => {
+            ResourceModel.getResources()
+                .then(resources => {
+                    if (resources.filter(resource => resource.resource_name === req.body.resource_name)) {
+                        res.status(400).json({ message: "resource_name must be unique" })
+                    } else {
+                        res.status(500).json({ error: err.message })
+                    }
+                })
+        })
 
 })
 
@@ -121,3 +221,32 @@ function validateProjectId(req, res, next) {
 }
 
 module.exports = router
+
+
+//||||||||||||||||||||||||||||||
+
+//Another way for Buddy reference GET: 
+
+// Promise.all(queries)
+// .then( results => {
+//     res.status(200).json({
+//         project: {
+//             ...results[0],
+//             project_completed: results[0].project_completed ? true : false
+//         }, 
+//         resources: results[1].map( resource => {
+//             return {
+//                 id: resource.id,
+//                 name: resource.resource_name,
+//                 deascription: resource.resource_description,
+//                 completed: resource.resource_completed ? true : false
+//             }
+//         }),
+//         tasks: results[2].map( task => {
+//             return {
+//                 ...task,
+//                 task_completed: task.task_completed ? true : false 
+//             }
+//         })
+//     })
+// })
