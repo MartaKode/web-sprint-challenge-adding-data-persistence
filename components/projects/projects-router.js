@@ -132,7 +132,28 @@ router.get('/:id', async (req, res) => {
         const projectResources = await ProjectsModel.getProjectResources(id)
         const projectTasks = await ProjectsModel.getProjectTasks(id)
 
-        res.json({project, projectResources, projectTasks})
+        const organized = {
+            project: {
+                ...project,
+                project_completed: project.project_completed ? true : false
+            },
+            resources: projectResources.map(resource => {
+                return {
+                    id: resource.id,
+                    resource_name: resource.resource_name,
+                    resource_description: resource.resource_description
+                }
+            }),
+            tasks: projectTasks.map( task => {
+                return {
+                    ...task, 
+                    task_completed: task.task_description ? true : false
+                }
+            })
+        }
+
+        // res.json({project, projectResources, projectTasks})
+          res.json(organized)
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
